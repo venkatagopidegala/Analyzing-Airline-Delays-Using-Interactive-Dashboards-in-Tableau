@@ -1,1 +1,6 @@
 # Analyzing-Airline-Delays-Using-Interactive-Dashboards-in-Tableau
+This project focuses on analyzing historical airline flight data to understand the primary factors contributing to flight delays and to predict whether a flight is likely to be delayed. Using data analytics and machine learning techniques, the system processes large datasets containing flight schedules, carrier details, departure and arrival times, routes, and delay information to extract meaningful insights.
+
+The project begins with data cleaning and preprocessing to handle missing values, inconsistencies, and outliers. Exploratory Data Analysis (EDA) is then performed to identify delay patterns based on factors such as airline, time of day, day of the week, and route. Feature engineering techniques are applied to improve model performance by selecting and transforming relevant variables.
+
+Machine learning models such as Logistic Regression and Random Forest are used to predict flight delays, and their performance is evaluated using metrics like accuracy and ROC-AUC. The results are visualized using dashboards and charts to clearly communicate trends and predictions. This project demonstrates practical skills in data analysis, statistical thinking, machine learning, and data visualization, and provides actionable insights that can help airlines improve scheduling and reduce delays.
