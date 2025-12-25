@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Flight Delay Result</title>
+
+<link rel="stylesheet" href="{{ url_for('static', filename='result.css') }}">
+
+<style>
+/* ================= BACKGROUND ================= */
+body {
+    margin: 0;
+    font-family: 'Segoe UI', sans-serif;
+    background: radial-gradient(circle at top, #355c6b, #0f2027);
+    color: #fff;
+}
+
+/* Moving storm background */
+.magic-bg {
+    position: fixed;
+    inset: 0;
+    background:
+        linear-gradient(120deg, rgba(255,255,255,0.03) 25%, transparent 25%),
+        linear-gradient(300deg, rgba(255,255,255,0.03) 25%, transparent 25%);
+    animation: clouds 40s linear infinite;
+    z-index: -1;
+}
+
+@keyframes clouds {
+    from { background-position: 0 0; }
+    to { background-position: 2000px 1000px; }
+}
+
+/* ================= LAYOUT ================= */
+.main-wrapper {
+    display: flex;
+    justify-content: center;
+    gap: 30px;
+    padding: 80px 30px;
+}
+
+/* ================= COMMON CARD ================= */
+.card, .result-card, .advisory-card, .service-card {
+    border-radius: 20px;
+    box-shadow: 0 20px 50px rgba(0,0,0,0.35);
+    animation: float 6s ease-in-out infinite;
+}
+
+@keyframes float {
+    0%,100% { transform: translateY(0); }
+    50% { transform: translateY(-10px); }
+}
+
+/* ================= LEFT PANEL ================= */
+.left-panel {
+    width: 280px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.youtube-card {
+    background: linear-gradient(135deg, #e96443, #904e95);
+    padding: 18px;
+}
+
+.music-card {
+    background: linear-gradient(135deg, #56ab2f, #a8e063);
+    padding: 18px;
+}
+
+.card a {
+    display: block;
+    margin-top: 8px;
+    padding: 10px;
+    border-radius: 25px;
+    background: rgba(255,255,255,0.25);
+    color: white;
+    text-decoration: none;
+    font-weight: bold;
+    transition: 0.3s;
+}
+
+.card a:hover {
+    background: rgba(255,255,255,0.45);
+    transform: scale(1.05);
+}
+
+/* ================= CENTER RESULT ================= */
+.result-card {
+    width: 380px;
+    padding: 30px;
+    text-align: center;
+    background: rgba(255,255,255,0.15);
+    backdrop-filter: blur(15px);
+}
+
+/* Delay title */
+.status.delayed {
+    color: #ff4d4d;
+    text-shadow: 0 0 15px rgba(255,77,77,0.8);
+    animation: shake 1.5s infinite;
+}
+
+@keyframes shake {
+    0%,100% { transform: translateX(0); }
+    50% { transform: translateX(2px); }
+}
+
+/* Delay box */
+.delay-box {
+    background: rgba(255,255,255,0.25);
+    border-radius: 18px;
+    padding: 20px;
+    margin: 25px 0;
+}
+
+/* 🔥 MAIN POINT – DELAY TIME */
+.time {
+    font-size: 42px;
+    font-weight: 900;
+    color: #ffffff;
+    margin-top: 8px;
+    text-shadow: 0 0 20px rgba(0,200,255,0.9);
+    animation: pulse 1.8s infinite;
+}
+
+@keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.08); }
+    100% { transform: scale(1); }
+}
+
+/* Button */
+.btn {
+    display: inline-block;
+    margin-top: 15px;
+    padding: 14px 26px;
+    border-radius: 30px;
+    background: linear-gradient(135deg, #00c6ff, #0072ff);
+    color: white;
+    text-decoration: none;
+    font-weight: bold;
+    box-shadow: 0 0 20px rgba(0,198,255,0.7);
+    transition: 0.3s;
+}
+
+.btn:hover {
+    transform: scale(1.1);
+}
+
+/* ================= RIGHT PANEL ================= */
+.right-panel {
+    width: 320px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.advisory-card {
+    background: linear-gradient(135deg, #fff1a8, #ffe082);
+    padding: 20px;
+    color: #000;
+}
+
+.badge {
+    background: red;
+    color: white;
+    padding: 6px 14px;
+    border-radius: 20px;
+    font-size: 12px;
+}
+
+.service-card {
+    background: linear-gradient(135deg, #e3f2fd, #bbdefb);
+    padding: 20px;
+    color: #000;
+}
+
+.right-panel a {
+    display: block;
+    margin-top: 10px;
+    padding: 12px;
+    border-radius: 25px;
+    background: linear-gradient(135deg, #007bff, #0056d2);
+    color: white;
+    text-align: center;
+    text-decoration: none;
+    font-weight: 600;
+    transition: 0.3s;
+}
+
+.right-panel a:hover {
+    transform: scale(1.05);
+}
+
+/* ================= RESPONSIVE ================= */
+@media (max-width: 1100px) {
+    .main-wrapper {
+        flex-direction: column;
+        align-items: center;
+    }
+}
+</style>
+</head>
+
+<body>
+
+<div class="magic-bg"></div>
+
+<div class="main-wrapper">
+
+<!-- LEFT -->
+<div class="left-panel">
+    <div class="card youtube-card">
+        <h3>🎬 Entertainment</h3>
+        <p>Watch videos and movies while waiting.</p>
+        <a href="https://www.youtube.com/">YouTube</a>
+        <a href="https://www.netflix.com/">Netflix</a>
+        <a href="https://www.disneyplus.com/">Disney+</a>
+    </div>
+
+    <div class="card music-card">
+        <h3>🎵 Music</h3>
+        <p>Relax with music during delays.</p>
+        <a href="https://music.youtube.com/">YouTube Music</a>
+        <a href="https://www.spotify.com/">Spotify</a>
+        <a href="https://www.jiosaavn.com/">JioSaavn</a>
+    </div>
+</div>
+
+<!-- CENTER -->
+<div class="result-card">
+    <h1 class="status delayed">{{ delay_message }}</h1>
+
+    <!-- ✅ MAIN FIX HERE -->
+    <div class="delay-box">
+        <p class="label">Predicted Delay</p>
+        <p class="time">{{ delay_text }}</p>
+    </div>
+
+    <p class="label">Flight Date</p>
+    <p class="time">{{ flight_date }}</p>
+
+    <a href="{{ url_for('predict') }}" class="btn">
+        Go Back Check Another Flight
+    </a>
+</div>
+
+<!-- RIGHT -->
+<div class="right-panel">
+    <div class="advisory-card">
+        <span class="badge">LIVE UPDATE</span>
+        <h3>📰 Airline Travel Advisory</h3>
+        <p>Flight operations across India may be affected.</p>
+        <a href="https://airsewa.gov.in">AirSewa – Government Advisory</a>
+        <a href="https://mausam.imd.gov.in">IMD – Weather Alerts</a>
+        <a href="https://flightaware.com/live">Live Airport Delays</a>
+    </div>
+
+    <div class="service-card">
+        <h3>• Stay •  Food • Rebook</h3>
+        <a href="https://www.google.com/maps">Open Google Maps</a>
+        <a href="https://www.booking.com">Airline Hotels</a>
+        <a href="https://www.google.com/flights">Alternate Flights</a>
+    </div>
+</div>
+
+</div>
+
+</body>
+</html>

@@ -1,0 +1,70 @@
+from flask import Flask, render_template, request
+import pickle
+import numpy as np
+
+app = Flask(__name__)
+
+# Load model
+with open('lr_model.pkl', 'rb') as f:
+    lr_model = pickle.load(f)
+
+# ---------------- ENCODING ----------------
+
+def encode_airport(code):
+    airport_map = {
+        "DEL": 1,
+        "BOM": 2,
+        "BLR": 3,
+        "MAA": 4,
+        "HYD": 5,
+        "CCU": 6,
+        "VGA": 7
+    }
+    return airport_map.get(code, 0)
+
+def encode_carrier(carrier):
+    carrier_map = {
+        "AI": 1,   # Air India
+        "6E": 2,   # IndiGo
+        "UK": 3    # Vistara
+    }
+    return carrier_map.get(carrier, 0)
+
+# ---------------- ROUTES ----------------
+
+@app.route('/', methods=['GET', 'POST'])
+def index():
+    if request.method == 'POST':
+
+        origin_code = request.form['origin']
+        dest_code = request.form['dest']
+        carrier = request.form['carrier']
+        temperature = float(request.form['temperature'])
+        wind_speed = float(request.form['wind_speed'])
+
+        origin = encode_airport(origin_code)
+        dest = encode_airport(dest_code)
+        carrier = encode_carrier(carrier)
+
+        input_data = np.array([[origin, dest, carrier, temperature, wind_speed]])
+
+        delay = float(lr_model.predict(input_data)[0])
+
+        if delay > 2:
+            msg = "✈️ Flight is Delayed"
+            delay_text = f"{delay:.2f} minutes"
+        else:
+            msg = "✅ Flight is On Time"
+            delay_text = "No Delay"
+
+        return render_template(
+            "result.html",
+            delay_message=msg,
+            dep_delay=delay_text
+        )
+
+    return render_template("index.html")
+
+
+if __name__ == "__main__":
+    app.run(debug=True)

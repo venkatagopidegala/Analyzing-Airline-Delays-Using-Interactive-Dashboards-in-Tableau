@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Flight Delay Prediction</title>
+
+<style>
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    font-family: "Segoe UI", Tahoma, sans-serif;
+    height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+
+    /* Moving background */
+    background-image:
+        linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.5)),
+        url("https://tse2.mm.bing.net/th/id/OIP.0fi8GQsx8NVqZ4Mfe_VfmAHaEK?pid=Api&P=0&h=180");
+
+    background-size: cover;
+    background-repeat: repeat-y;
+    background-position: center 0;
+
+    animation: moveBackground 5s linear infinite;
+}
+
+/* Background animation */
+@keyframes moveBackground {
+    from {
+        background-position: center 0;
+    }
+    to {
+        background-position: center 100%;
+    }
+}
+
+
+/* Wrapper to hold side images and form */
+.page-wrapper {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Side Plane Images */
+.side-plane {
+    position: absolute;
+    width: 320px; 
+    z-index: 1;
+    pointer-events: none;
+    filter: drop-shadow(0 20px 30px rgba(0,0,0,0.5));
+    animation: floatPlane 5s ease-in-out infinite;
+}
+
+.left-plane {
+    left: 2%;
+    top: 15%;
+}
+
+.right-plane {
+    right: 2%;
+    bottom: 15%;
+    transform: scaleX(-1); 
+}
+
+@keyframes floatPlane {
+    0%, 100% { transform: translateY(0) rotate(0deg); }
+    50% { transform: translateY(-30px) rotate(3deg); }
+}
+
+/* Form Card */
+.container {
+    position: relative;
+    width: 450px;
+    padding: 30px;
+    background: rgba(255, 255, 255, 0.98);
+    border-radius: 20px;
+    box-shadow: 0 25px 60px rgba(0,0,0,0.4);
+    z-index: 10;
+}
+
+h2 {
+    text-align: center;
+    margin-bottom: 25px;
+    color: #0a2540;
+}
+
+label {
+    font-weight: 600;
+    color: #444;
+    margin-top: 12px;
+    display: block;
+}
+
+input, select {
+    width: 100%;
+    padding: 12px;
+    margin-top: 6px;
+    border-radius: 10px;
+    border: 1px solid #ccc;
+    font-size: 15px;
+}
+
+button {
+    margin-top: 25px;
+    width: 100%;
+    padding: 14px;
+    font-size: 16px;
+    font-weight: bold;
+    background: linear-gradient(135deg, #007bff, #0056d2);
+    color: white;
+    border: none;
+    border-radius: 30px;
+    cursor: pointer;
+    transition: 0.3s ease;
+}
+
+button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(0, 123, 255, 0.4);
+}
+
+/* Autocomplete */
+.autocomplete { position: relative; }
+.result-box {
+    position: absolute;
+    width: 100%;
+    background: white;
+    border-radius: 10px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+    max-height: 200px;
+    overflow-y: auto;
+    display: none;
+    z-index: 1000;
+}
+.result-box div {
+    padding: 12px;
+    cursor: pointer;
+    border-bottom: 1px solid #eee;
+}
+.result-box div:hover { background: #f0f7ff; }
+
+/* Loading Animation */
+#loadingOverlay {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background: rgba(10, 37, 64, 0.95);
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    z-index: 2000;
+    color: white;
+}
+.loader-plane {
+    font-size: 60px;
+    animation: flyAcross 2s linear infinite;
+}
+@keyframes flyAcross {
+    0% { transform: translateX(-150px); opacity: 0; }
+    50% { opacity: 1; }
+    100% { transform: translateX(150px); opacity: 0; }
+}
+
+@media (max-width: 950px) {
+    .side-plane { display: none; }
+}
+</style>
+</head>
+
+<body>
+
+<div class="page-wrapper">
+    
+    <div class="container">
+        <h2>AIRLINE DELAY PREDICTION </h2>
+        <form id="delayForm" method="POST" action="/predict">
+
+            <label>From</label>
+            <div class="autocomplete">
+                <input type="text" id="fromInput" placeholder="Enter city or airport" required autocomplete="off">
+                <input type="hidden" name="origin" id="fromCode">
+                <div class="result-box" id="fromResults"></div>
+            </div>
+
+            <label>To</label>
+            <div class="autocomplete">
+                <input type="text" id="toInput" placeholder="Enter city or airport" required autocomplete="off">
+                <input type="hidden" name="dest" id="toCode">
+                <div class="result-box" id="toResults"></div>
+            </div>
+
+            <label>Flight Date</label>
+            <input type="date" name="flight_date" required>
+ 
+            <label>Carrier</label>
+            <select name="carrier" required>
+                <option value="">Select Airline</option>
+                <option value="AI">Air India</option>
+                <option value="6E">IndiGo</option>
+                <option value="UK">Vistara</option>
+                <option value="UA">United Airlines</option>
+                <option value="AA">American Airlines</option>
+                <option value="DL">Delta Airlines</option>
+                <option value="AD">Air Deccan</option>
+            </select>
+
+            <label>Temperature (°F)</label>
+            <input type="number" name="temperature" required>
+
+            <label>Wind Speed (mph)</label>
+            <input type="number" name="wind_speed" required>
+
+            <button type="submit">Predict Delay</button>
+        </form>
+    </div>
+
+    </div>
+
+<div id="loadingOverlay">
+    <div class="loader-plane">✈️</div>
+    <h3>Analyzing Flight Patterns...</h3>
+    <p>Please wait, our AI is checking weather & schedules.</p>
+</div>
+
+<script>
+const airports = [
+    { name: "Indira Gandhi International Airport", city: "New Delhi", code: "DEL" },
+    { name: "Chhatrapati Shivaji Maharaj Intl", city: "Mumbai", code: "BOM" },
+    { name: "Kempegowda International Airport", city: "Bengaluru", code: "BLR" },
+    { name: "Chennai International Airport", city: "Chennai", code: "MAA" },
+    { name: "Netaji Subhas Chandra Bose Intl", city: "Kolkata", code: "CCU" },
+    { name: "Rajiv Gandhi International Airport", city: "Hyderabad", code: "HYD" },
+    { name: "Cochin International Airport", city: "Kochi", code: "COK" },
+    { name: "Trivandrum International Airport", city: "Thiruvananthapuram", code: "TRV" },
+    { name: "Sardar Vallabhbhai Patel Intl", city: "Ahmedabad", code: "AMD" },
+    { name: "Pune International Airport", city: "Pune", code: "PNQ" },
+    { name: "Visakhapatnam Airport", city: "Andhra Pradesh", code: "VTZ" },
+    { name: "Tirupati Airport", city: "Andhra Pradesh", code: "TIR" },
+    { name: "Vijayawada Airport", city: "Andhra Pradesh", code: "VGA" },
+    { name: "Amritsar International Airport", city: "Punjab", code: "ATQ" },
+    { name: "Jaipur International Airport", city: "Rajasthan", code: "JAI" },
+    { name: "Udaipur Airport", city: "Rajasthan", code: "UDR" },
+    { name: "Lucknow Airport", city: "Uttar Pradesh", code: "LKO" },
+    { name: "Varanasi Airport", city: "Uttar Pradesh", code: "VNS" },
+    { name: "Patna Airport", city: "Bihar", code: "PAT" },
+    { name: "Ranchi Airport", city: "Jharkhand", code: "IXR" },
+    { name: "Bhubaneswar Airport", city: "Odisha", code: "BBI" },
+    { name: "Raipur Airport", city: "Chhattisgarh", code: "RPR" },
+    { name: "Indore Airport", city: "Madhya Pradesh", code: "IDR" },
+    { name: "Bhopal Airport", city: "Madhya Pradesh", code: "BHO" },
+    { name: "Nagpur Airport", city: "Maharashtra", code: "NAG" },
+    { name: "Aurangabad Airport", city: "Maharashtra", code: "IXU" },
+    { name: "Surat Airport", city: "Gujarat", code: "STV" },
+    { name: "Vadodara Airport", city: "Gujarat", code: "BDQ" },
+    { name: "Guwahati Airport", city: "Assam", code: "GAU" },
+    { name: "Imphal Airport", city: "Manipur", code: "IMF" },
+    { name: "Agartala Airport", city: "Tripura", code: "IXA" },
+    { name: "Srinagar Airport", city: "Jammu & Kashmir", code: "SXR" },
+    { name: "Jammu Airport", city: "Jammu & Kashmir", code: "IXJ" },
+    { name: "Leh Airport", city: "Ladakh", code: "IXL" },
+    { name: "Chandigarh Airport", city: "Chandigarh", code: "IXC" },
+    { name: "Dehradun Airport", city: "Uttarakhand", code: "DED" },
+    { name: "Port Blair Airport", city: "Andaman & Nicobar", code: "IXZ" },
+    { name: "Dabolim Airport", city: "Goa", code: "GOI" },
+    { name: "Kannur International Airport", city: "Kerala", code: "CNN" },
+    { name: "Madurai Airport", city: "Tamil Nadu", code: "IXM" },
+    { name: "Coimbatore Airport", city: "Tamil Nadu", code: "CJB" },
+    { name: "Trichy Airport", city: "Tamil Nadu", code: "TRZ" },
+    { name: "Mangalore Airport", city: "Karnataka", code: "IXE" },
+    { name: "Hubli Airport", city: "Karnataka", code: "HBX" },
+    { name: "Calicut International Airport", city: "Kerala", code: "CCJ" },
+
+    /* ===== EXISTING INTERNATIONAL ===== */
+    { name: "Dubai International Airport", city: "Dubai", code: "DXB" },
+    { name: "Heathrow Airport", city: "London", code: "LHR" },
+    { name: "John F. Kennedy Intl", city: "New York", code: "JFK" },
+    { name: "Singapore Changi Airport", city: "Singapore", code: "SIN" },
+    { name: "Charles de Gaulle Airport", city: "Paris", code: "CDG" },
+    { name: "Haneda Airport", city: "Tokyo", code: "HND" },
+    { name: "Hartsfield-Jackson Atlanta", city: "Atlanta", code: "ATL" },
+    { name: "Hamad International Airport", city: "Doha", code: "DOH" },
+    { name: "Hong Kong International", city: "Hong Kong", code: "HKG" },
+    { name: "Schiphol Airport", city: "Amsterdam", code: "AMS" },
+    { name: "Frankfurt Airport", city: "Frankfurt", code: "FRA" },
+    { name: "Istanbul Airport", city: "Istanbul", code: "IST" },
+    { name: "Incheon International", city: "Seoul", code: "ICN" },
+    { name: "Sydney Kingsford Smith", city: "Sydney", code: "SYD" },
+    { name: "Pearson International", city: "Toronto", code: "YYZ" },
+    { name: "Kuala Lumpur International Airport", city: "Kuala Lumpur", code: "KUL" },
+
+    /* ===== NEWLY ADDED (15 INTERNATIONAL) ===== */
+    { name: "Los Angeles International Airport", city: "Los Angeles", code: "LAX" },
+    { name: "San Francisco International Airport", city: "San Francisco", code: "SFO" },
+    { name: "Dallas/Fort Worth International Airport", city: "Dallas", code: "DFW" },
+    { name: "Madrid Barajas Airport", city: "Madrid", code: "MAD" },
+    { name: "Barcelona El Prat Airport", city: "Barcelona", code: "BCN" },
+    { name: "Rome Fiumicino Airport", city: "Rome", code: "FCO" },
+    { name: "Zurich Airport", city: "Zurich", code: "ZRH" },
+    { name: "Vienna International Airport", city: "Vienna", code: "VIE" },
+    { name: "Brussels Airport", city: "Brussels", code: "BRU" },
+    { name: "Stockholm Arlanda Airport", city: "Stockholm", code: "ARN" },
+    { name: "Bangkok Suvarnabhumi Airport", city: "Bangkok", code: "BKK" },
+    { name: "Jakarta Soekarno–Hatta Airport", city: "Jakarta", code: "CGK" },
+    { name: "Auckland Airport", city: "Auckland", code: "AKL" },
+    { name: "Cape Town International Airport", city: "Cape Town", code: "CPT" },
+    { name: "São Paulo–Guarulhos Airport", city: "São Paulo", code: "GRU" },
+    { name: "Phoenix Sky Harbor International Airport", city: "Phoenix", country: "United States", code: "PHX" }
+];
+
+function setupAutocomplete(inputId, resultId, hiddenId) {
+    const input = document.getElementById(inputId);
+    const results = document.getElementById(resultId);
+    const hidden = document.getElementById(hiddenId);
+
+    input.addEventListener("input", () => {
+        const value = input.value.toLowerCase();
+        results.innerHTML = "";
+        if (!value) { results.style.display = "none"; return; }
+
+        airports.filter(a =>
+            a.city.toLowerCase().includes(value) || a.name.toLowerCase().includes(value)
+        ).forEach(a => {
+            const div = document.createElement("div");
+            div.innerHTML = `<b>${a.city}</b> – ${a.name} (${a.code})`;
+            div.onclick = () => {
+                input.value = `${a.city} (${a.code})`;
+                hidden.value = a.code;
+                results.style.display = "none";
+            };
+            results.appendChild(div);
+        });
+        results.style.display = "block";
+    });
+
+    document.addEventListener("click", (e) => {
+        if (e.target !== input) results.style.display = "none";
+    });
+}
+
+setupAutocomplete("fromInput", "fromResults", "fromCode");
+setupAutocomplete("toInput", "toResults", "toCode");
+
+document.getElementById('delayForm').onsubmit = function() {
+    document.getElementById('loadingOverlay').style.display = 'flex';
+};
+</script>
+
+</body>
+</html>

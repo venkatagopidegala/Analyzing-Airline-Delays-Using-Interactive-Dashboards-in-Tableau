@@ -1,0 +1,122 @@
+/* RESET */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: "Segoe UI", sans-serif;
+}
+
+/* BACKGROUND */
+body {
+    min-height: 100vh;
+    overflow: hidden;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: linear-gradient(120deg, #0f2027, #203a43, #2c5364);
+}
+
+/* MAGICAL ANIMATED BACKGROUND */
+.magic-bg {
+    position: fixed;
+    inset: -50%;
+    background:
+        radial-gradient(circle at top left, rgba(0,123,255,0.25), transparent 40%),
+        radial-gradient(circle at bottom right, rgba(0,255,200,0.25), transparent 40%);
+    animation: floatBg 15s infinite alternate ease-in-out;
+    z-index: -1;
+}
+
+@keyframes floatBg {
+    from { transform: translate(-10%, -10%); }
+    to   { transform: translate(10%, 10%); }
+}
+
+/* RESULT CARD (with fallback) */
+.result-card {
+    background: rgba(255, 255, 255, 0.18);
+    /* fallback for browsers without backdrop-filter */
+    background-color: #ffffff;
+    background-color: rgba(255,255,255,0.18);
+
+    -webkit-backdrop-filter: blur(18px);
+    backdrop-filter: blur(18px);
+
+    padding: 40px;
+    border-radius: 25px;
+    width: 380px;
+    text-align: center;
+    box-shadow: 0 30px 80px rgba(0,0,0,0.4);
+    animation: fadeUp 0.8s ease;
+}
+
+@keyframes fadeUp {
+    from { opacity: 0; transform: translateY(30px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+/* STATUS */
+.status {
+    font-size: 26px;
+    margin-bottom: 25px;
+}
+
+/* Delayed */
+.status.delayed {
+    color: #ff4d4d;
+    text-shadow: 0 0 10px rgba(255,77,77,0.6);
+}
+
+/* Not Delayed (future-safe) */
+.status.not-delayed {
+    color: #22c55e;
+    text-shadow: 0 0 10px rgba(34,197,94,0.6);
+}
+
+/* DELAY BOX */
+.delay-box {
+    background: rgba(255, 255, 255, 0.45);
+    border-radius: 18px;
+    padding: 22px;
+    margin-bottom: 30px;
+}
+
+/* LABEL */
+.label {
+    color: #0f172a;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+/* TIME VALUE */
+.time {
+    font-size: 34px;
+    font-weight: 700;
+    color: #0f172a; /* visible on all backgrounds */
+    margin-top: 8px;
+}
+
+.time span {
+    font-size: 16px;
+    font-weight: 600;
+    margin-left: 4px;
+}
+
+/* BUTTON */
+.btn {
+    display: inline-block;
+    padding: 14px 28px;
+    background: linear-gradient(135deg, #007bff, #00c6ff);
+    color: white;
+    text-decoration: none;
+    border-radius: 30px;
+    font-size: 15px;
+    font-weight: 600;
+    transition: transform 0.3s, box-shadow 0.3s;
+}
+
+.btn:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 30px rgba(0,198,255,0.6);
+}
+
